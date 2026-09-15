@@ -4,20 +4,19 @@ Reference implementation of **ChemFixer+: Copy-Preserving Multi-Span Editing for
 
 ## Overview
 
-ChemFixer+ is a structure-aware SMILES correction framework that separates **where to edit** from **what to generate**. Sparse error regions are localized at token and gap level, while unselected context is copied directly. Inputs that are unsuitable for local repair, or unsuccessful local repairs, are handled by a shared global correction path.
+ChemFixer+ is a structure-aware SMILES correction framework that separates **where to edit** from **what to generate**. Sparse error regions are localized at the token and gap levels, while unselected context is copied directly. Inputs that are unsuitable for local repair, or local repairs that fail validation, are handled by a shared global correction path.
 
 The implementation includes:
 
-- extended SMILES tokenization with stereochemistry, charges, directional bonds, and multi-digit ring labels;
-- lexical role, branch-depth, and ring-state structural features;
-- token- and gap-level error localization with deterministic alignment;
-- copy-preserving multi-span repair with local/global routing;
-- paper-aligned masked pretraining, paired fine-tuning, and inference.
+- extended SMILES tokenization with stereochemistry, charges, directional bonds, and multi-digit ring labels
+- lexical role, branch-depth, and ring-state structural features
+- token- and gap-level error localization with deterministic alignment
+- copy-preserving multi-span repair with local/global routing
+- paper-aligned masked pretraining, paired fine-tuning, and inference
 
 ChemFixer+ builds on our previous **ChemFixer** framework while introducing structure-aware error localization and copy-preserving multi-span repair.
 
 Previous work: [ChemFixer, IEEE JBHI 2026](https://doi.org/10.1109/JBHI.2025.3593825)
-
 
 ## Installation
 
@@ -46,7 +45,7 @@ By default, the original SMILES strings are preserved without canonicalization. 
 
 ### MOSES example
 
-For a MOSES-style CSV file:
+For a MOSES-style training CSV file:
 
 ```bash
 python scripts/prepare_smiles_corpus.py \
@@ -57,11 +56,11 @@ python scripts/prepare_smiles_corpus.py \
 
 ### ChEMBL37 example
 
-For a ChEMBL37 Parquet export:
+For a ChEMBL37 training-split Parquet file:
 
 ```bash
 python scripts/prepare_smiles_corpus.py \
-  --input /path/to/chembl37.parquet \
+  --input /path/to/chembl37_train.parquet \
   --smiles-column smiles \
   --output data/raw/chembl37_train.txt
 ```
@@ -72,19 +71,31 @@ The `--smiles-column` argument can be changed to match the downloaded dataset. O
 
 ChemFixer+ is fine-tuned on invalid autoregressive reconstructions paired with their valid reference SMILES.
 
-Given reconstruction CSV files containing reference and predicted SMILES:
+Given reconstruction CSV files containing reference and predicted SMILES, training-reference correction pairs can be collected with:
 
 ```bash
 python scripts/collect_reconstruction_pairs.py \
-  --input reconstruction_epoch_*.csv \
+  --input reconstruction_train_epoch_*.csv \
   --target-column target_smiles \
   --prediction-column predicted_smiles \
   --id-column chembl_id \
   --deduplicate \
-  --output data/processed/correction_pairs.jsonl
+  --output data/processed/correction_pairs_train.jsonl
 ```
 
-Valid reconstructions are excluded. The output JSONL contains generator-derived invalid/valid correction pairs that can be passed directly to `scripts/train.py`.
+Validation-reference pairs are collected separately using the same procedure:
+
+```bash
+python scripts/collect_reconstruction_pairs.py \
+  --input reconstruction_valid_epoch_*.csv \
+  --target-column target_smiles \
+  --prediction-column predicted_smiles \
+  --id-column chembl_id \
+  --deduplicate \
+  --output data/processed/correction_pairs_valid.jsonl
+```
+
+Valid reconstructions are excluded. The resulting training and validation JSONL files are used separately for paired fine-tuning and validation-based checkpoint selection.
 
 For free-generation outputs that do not have paired references, RDKit-valid and invalid outputs can be separated with:
 
@@ -101,7 +112,7 @@ python scripts/classify_generated_smiles.py \
 
 ```bash
 python scripts/pretrain.py \
-  --smiles /path/to/valid_smiles.csv \
+  --smiles data/raw/chembl37_train.txt \
   --config configs/paper.yaml \
   --seed 0 \
   --device cuda \
@@ -126,7 +137,7 @@ python scripts/train.py \
   --output checkpoints/chemfixerplus_last.pt
 ```
 
-With the paper configuration, validation is evaluated every 1,000 optimizer updates. The checkpoint with the lowest validation joint loss is written to `--best-output`, while `--output` preserves the final-update checkpoint. Held-out test benchmarks are not used for checkpoint selection.
+With the paper configuration, the validation objective is evaluated every 1,000 optimizer updates. The checkpoint with the lowest validation joint loss is written to `--best-output`, while `--output` preserves the final-update checkpoint. Held-out test benchmarks are not used for checkpoint selection.
 
 The paper configuration uses:
 
@@ -182,22 +193,17 @@ The Fig. 1 example provides a lightweight end-to-end software test:
 
 ```bash
 python scripts/verify_paper_example.py
-
+```
 
 The example verifies alignment, localization, local routing, repair decoding, copy-preserving assembly, and RDKit validation.
 
-It is an integration test, not a reported benchmark experiment.
+This test is separate from the paper's benchmark evaluation.
 
 ## Implementation and experiment artifacts
 
-This repository provides the ChemFixer+ implementation, data utilities,
-and training/inference scripts. The paper-aligned configuration is available
-in `configs/paper.yaml`.
+This repository provides the ChemFixer+ implementation, data utilities, and training/inference scripts. The paper-aligned configuration is available in `configs/paper.yaml`.
 
-The current release contains source code and configuration files.
-Paper-trained checkpoints, fixed experimental datasets, and table/figure
-reproduction artifacts are not bundled with this release.
-
+The current release contains source code and configuration files. Paper-trained checkpoints, fixed experimental datasets, and table/figure reproduction artifacts are not bundled with this release.
 
 ## Citation
 
