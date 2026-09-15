@@ -20,4 +20,4 @@ jobs:
         run: pytest -q
       - name: End-to-end method smoke test
       - name: Paper-example local-repair integration test
-        run: python scripts/overfit_paper_example.py
+        run: python scripts/verify_paper_example.py
