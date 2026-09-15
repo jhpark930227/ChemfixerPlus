@@ -1,0 +1,16 @@
+# Lightweight configuration for CI and installation checks only.
+# Not used for the reported paper experiments.
+model:
+  d_model: 64
+  nhead: 4
+  num_encoder_layers: 1
+  num_decoder_layers: 1
+  dim_feedforward: 128
+  dropout: 0.10
+  max_positions: 260
+  lambda_global: 0.25
+training:
+  lr: 0.002
+  batch_size: 8
+  updates: 8
+  grad_clip: 1.0

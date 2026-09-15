@@ -1,0 +1,30 @@
+# Paper-aligned full ChemFixer+ configuration.
+model:
+  d_model: 512
+  nhead: 8
+  num_encoder_layers: 6
+  num_decoder_layers: 6
+  dim_feedforward: 2048
+  dropout: 0.25
+  max_positions: 260
+  lambda_global: 0.25
+training:
+  lr: 1.0e-4
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  effective_batch_size: 64
+  updates: 20000
+  grad_clip: 1.0
+  masking_probability: 0.10
+  scheduler: cosine
+  min_lr: 0.0
+  seed: 0
+inference:
+  threshold: 0.5
+  beam_size: 5
+  max_repair_tokens: 32
+  max_smiles_tokens: 254
+routing:
+  max_spans: 3
+  max_density: 0.20
+  max_encoder_len: 256

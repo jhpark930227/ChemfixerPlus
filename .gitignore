@@ -1,0 +1,26 @@
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+.env
+*.pt
+*.pth
+checkpoints/
+runs/
+outputs/
+data/raw/
+data/processed/
+!data/README.md
+.DS_Store
+
+# Experiment artifacts
+logs/
+results/
+*.log
+
+# Local/private artifacts
+artifacts/
+private/

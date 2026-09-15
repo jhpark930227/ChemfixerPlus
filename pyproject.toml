@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chemfixerplus"
+version = "0.2.0"
+description = "Paper-faithful reference implementation of ChemFixer+ for copy-preserving multi-span SMILES correction"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "torch>=2.1,<2.8",
+  "rdkit>=2023.9",
+  "PyYAML>=6.0",
+  "tqdm>=4.66",
+  "pandas>=2.0",
+  "pyarrow>=14.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+include = ["chemfixerplus*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

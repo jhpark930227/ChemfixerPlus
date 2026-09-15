@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the ChemFixer+ paper."
+title: "ChemFixer+"
+type: software
+authors:
+  - family-names: Park
+    given-names: Jun-Hyoung
+  - family-names: Lee
+    given-names: Seong-Whan
+repository-code: "https://github.com/jhpark930227/ChemfixerPlus"
+version: 0.2.0
+date-released: 2026-09-14
