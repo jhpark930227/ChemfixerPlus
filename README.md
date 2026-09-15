@@ -176,23 +176,27 @@ python scripts/predict.py \
 
 Inference first predicts token and gap edit sites. Eligible inputs are routed through copy-preserving local repair. Inputs that do not satisfy local-routing constraints, or local repairs that fail validation, are processed by global correction. If no acceptable candidate is found, the original input is returned unresolved.
 
-## Verification
+## Integration test
 
-The worked example from Fig. 1 can be used as a lightweight integration test:
+The Fig. 1 example provides a lightweight end-to-end software test:
 
 ```bash
 python scripts/verify_paper_example.py
-```
+
 
 The example verifies alignment, localization, local routing, repair decoding, copy-preserving assembly, and RDKit validation.
 
 It is an integration test, not a reported benchmark experiment.
 
-## Reproducibility
+## Implementation and experiment artifacts
 
-This repository contains the complete ChemFixer+ implementation, the paper-aligned configuration, and the training/inference pipeline.
+This repository provides the ChemFixer+ implementation, data utilities,
+and training/inference scripts. The paper-aligned configuration is available
+in `configs/paper.yaml`.
 
-The camera-ready release will additionally provide the exact generator-derived correction datasets, final trained checkpoints, benchmark and ablation reproduction scripts, experiment manifests, and result-generation artifacts used for exact numerical reproduction. These additions do not change the core ChemFixer+ architecture or training/inference method provided here.
+The current release contains source code and configuration files.
+Paper-trained checkpoints, fixed experimental datasets, and table/figure
+reproduction artifacts are not bundled with this release.
 
 
 ## Citation
