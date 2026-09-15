@@ -116,13 +116,17 @@ The ChemFixer+-specific localization heads, structural embeddings, mode tokens, 
 
 ```bash
 python scripts/train.py \
-  --pairs data/processed/correction_pairs.jsonl \
+  --pairs data/processed/correction_pairs_train.jsonl \
+  --validation-pairs data/processed/correction_pairs_valid.jsonl \
   --config configs/paper.yaml \
   --pretrained checkpoints/pretrained.pt \
   --seed 0 \
   --device cuda \
-  --output checkpoints/chemfixerplus.pt
+  --best-output checkpoints/chemfixerplus_best.pt \
+  --output checkpoints/chemfixerplus_last.pt
 ```
+
+With the paper configuration, validation is evaluated every 1,000 optimizer updates. The checkpoint with the lowest validation joint loss is written to `--best-output`, while `--output` preserves the final-update checkpoint. Held-out test benchmarks are not used for checkpoint selection.
 
 The paper configuration uses:
 
@@ -138,6 +142,8 @@ The paper configuration uses:
 | Peak learning rate | `1e-4` |
 | Effective batch size | 64 |
 | Optimizer updates | 20,000 |
+| Validation interval | 1,000 updates |
+| Checkpoint selection | lowest validation joint loss |
 | LR schedule | cosine decay |
 | Gradient clipping | 1.0 |
 | Global-loss weight | 0.25 |
@@ -148,36 +154,22 @@ For multiple fine-tuning seeds:
 ```bash
 for SEED in 0 1 2; do
   python scripts/train.py \
-    --pairs data/processed/correction_pairs.jsonl \
+    --pairs data/processed/correction_pairs_train.jsonl \
+    --validation-pairs data/processed/correction_pairs_valid.jsonl \
     --config configs/paper.yaml \
     --pretrained checkpoints/pretrained.pt \
     --seed "$SEED" \
     --device cuda \
-    --output "checkpoints/chemfixerplus_seed${SEED}.pt"
+    --best-output "checkpoints/chemfixerplus_seed${SEED}_best.pt" \
+    --output "checkpoints/chemfixerplus_seed${SEED}_last.pt"
 done
-```
-
-### Resume training
-
-Long runs can be continued from a saved training checkpoint:
-
-```bash
-python scripts/resume_finetune.py \
-  --pairs data/processed/correction_pairs.jsonl \
-  --config configs/paper.yaml \
-  --resume checkpoints/checkpoint_stepXXXXX.pt \
-  --target-step 20000 \
-  --scheduler-steps 20000 \
-  --output-prefix checkpoints/chemfixerplus_resume \
-  --seed 0 \
-  --device cuda
 ```
 
 ## Inference
 
 ```bash
 python scripts/predict.py \
-  --checkpoint checkpoints/chemfixerplus.pt \
+  --checkpoint checkpoints/chemfixerplus_best.pt \
   --device cuda \
   --smiles 'CCC(=O)O)CC1CCCCC'
 ```

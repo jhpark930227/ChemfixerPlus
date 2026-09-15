@@ -19,6 +19,7 @@ training:
   scheduler: cosine
   min_lr: 0.0
   seed: 0
+  validation_every: 1000
 inference:
   threshold: 0.5
   beam_size: 5
