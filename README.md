@@ -14,21 +14,10 @@ The implementation includes:
 - copy-preserving multi-span repair with local/global routing;
 - paper-aligned masked pretraining, paired fine-tuning, and inference.
 
-## Relation to ChemFixer
+ChemFixer+ builds on our previous **ChemFixer** framework while introducing structure-aware error localization and copy-preserving multi-span repair.
 
-ChemFixer+ builds on our previous **ChemFixer** framework while introducing structure-aware localization and copy-preserving multi-span repair.
+Previous work: [ChemFixer, IEEE JBHI 2026](https://doi.org/10.1109/JBHI.2025.3593825)
 
-J.-H. Park, H.-J. Song, and S.-W. Lee, **"ChemFixer: Correcting Invalid Molecules to Unlock Previously Unseen Chemical Space,"** *IEEE Journal of Biomedical and Health Informatics*, 2026.
-https://doi.org/10.1109/JBHI.2025.3593825
-
-## Training pipeline
-
-ChemFixer+ uses two stages:
-
-1. **Masked pretraining** on a valid SMILES corpus.
-2. **Paired fine-tuning** on generator-derived invalid reconstructions and their valid reference SMILES.
-
-The upstream molecular generator is separate from the ChemFixer+ correction model.
 
 ## Installation
 
@@ -49,7 +38,7 @@ python -m pytest -q
 
 All tests should pass before training or inference.
 
-## Dataset preparation
+## Data preparation
 
 ChemFixer+ masked pretraining uses a one-SMILES-per-line corpus. The provided `prepare_smiles_corpus.py` utility converts common molecular dataset formats, including TXT, SMI, SMILES, CSV, TSV, and Parquet, into this format.
 
@@ -79,8 +68,7 @@ python scripts/prepare_smiles_corpus.py \
 
 The `--smiles-column` argument can be changed to match the downloaded dataset. Optional `--deduplicate` and `--validate-rdkit` flags are available when those preprocessing steps are desired.
 
-
-## Collect generator-derived correction pairs
+## Correction-pair construction
 
 ChemFixer+ is fine-tuned on invalid autoregressive reconstructions paired with their valid reference SMILES.
 
@@ -107,7 +95,9 @@ python scripts/classify_generated_smiles.py \
   --invalid-output outputs/invalid.csv
 ```
 
-## Masked pretraining
+## Training
+
+### Masked pretraining
 
 ```bash
 python scripts/pretrain.py \
@@ -122,7 +112,7 @@ Masked pretraining performs full-sequence reconstruction with masking probabilit
 
 The ChemFixer+-specific localization heads, structural embeddings, mode tokens, and repair sentinels are introduced for paired fine-tuning while preserving pretrained token IDs and transferable model parameters.
 
-## Paired ChemFixer+ fine-tuning
+### Paired fine-tuning
 
 ```bash
 python scripts/train.py \
@@ -167,7 +157,7 @@ for SEED in 0 1 2; do
 done
 ```
 
-## Resume fine-tuning
+### Resume training
 
 Long runs can be continued from a saved training checkpoint:
 
@@ -206,23 +196,13 @@ The example verifies alignment, localization, local routing, repair decoding, co
 
 It is an integration test, not a reported benchmark experiment.
 
-## Repository layout
-
-```text
-chemfixerplus/    core ChemFixer+ implementation
-configs/
-  paper.yaml      full paper-aligned configuration
-  ci_smoke.yaml   CI and installation checks only
-scripts/          data preparation, pair collection, training, inference, verification
-tests/            unit and integration tests
-```
-
 ## Reproducibility
 
-This repository contains the complete ChemFixer+ method implementation, the paper-aligned configuration, and executable data preparation, training, and inference pipelines. `configs/paper.yaml` contains the full paper configuration; `configs/ci_smoke.yaml` is only for lightweight CI and installation checks.
+This repository contains the complete ChemFixer+ implementation, the paper-aligned configuration, and the training/inference pipeline.
 
 The camera-ready release will additionally provide the exact generator-derived correction datasets, final trained checkpoints, benchmark and ablation reproduction scripts, experiment manifests, and result-generation artifacts used for exact numerical reproduction. These additions do not change the core ChemFixer+ architecture or training/inference method provided here.
 
+
 ## Citation
 
-Citation metadata is provided in `CITATION.cff`.
+Citation metadata is provided in [`CITATION.cff`](CITATION.cff).
