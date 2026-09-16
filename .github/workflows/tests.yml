@@ -18,6 +18,5 @@ jobs:
           pip install -e '.[dev]'
       - name: Unit tests
         run: pytest -q
-      - name: End-to-end method smoke test
       - name: Paper-example local-repair integration test
         run: python scripts/verify_paper_example.py
